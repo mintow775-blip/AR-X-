@@ -1,0 +1,25 @@
+name: unpack-release
+on:
+  push:
+    paths:
+      - 'ar-x-mine-vercel.zip'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack zip into repo root
+        run: |
+          [ -f ar-x-mine-vercel.zip ] || exit 0
+          unzip -oq ar-x-mine-vercel.zip
+          rm -rf netlify css js pages assets index.html 404.html netlify.toml package-lock.json tests data
+          cp -a ar-x-mine/. .
+          rm -rf ar-x-mine ar-x-mine-vercel.zip ar-x-mine-v2-release.zip
+          git config user.name "release-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -m "Unpack Vercel release" || exit 0
+          git push
